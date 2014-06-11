@@ -166,6 +166,9 @@ Expr builtin_mset_call_expr(Expr seq_expr);
 Expr builtin_isort_call_expr(Expr set_expr);
 Expr builtin_list_to_seq_call_expr(Expr set_expr);
 
+Expr builtin_rand_int_expr(Expr max_expr);
+Expr builtin_rand_elem_expr(Expr set_expr);
+
 Expr read_file_call_expr(Expr file_name, bool raw);
 Expr write_to_file_call_expr(Expr file_name, bool append, Expr text);
 

@@ -341,6 +341,12 @@ bool is_valid_builtin(const string &str)
   if (str == "_list_to_seq_")
     return true;
 
+  if (str == "_rand_int_")
+    return true;
+
+  if (str == "_rand_elem_")
+    return true;
+
 	return false;
 }
 

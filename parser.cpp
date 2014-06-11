@@ -1252,6 +1252,18 @@ obj mk_expr_builtin_call(obj builtin_name, obj params)
     return box(builtin_list_to_seq_call_expr(ps[0]));
   }
 
+  if (name == "_rand_int_")
+  {
+    assert(ps.size() == 1);
+    return box(builtin_rand_int_expr(ps[0]));
+  }
+
+  if (name == "_rand_elem_")
+  {
+    assert(ps.size() == 1);
+    return box(builtin_rand_elem_expr(ps[0]));
+  }
+
   halt;
 }
 

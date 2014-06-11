@@ -2253,6 +2253,68 @@ Expr builtin_list_to_seq_call_expr(Expr set_expr)
   return mk_expr(new BuiltinListToSeqExpr(set_expr));
 }
 
+////////////////////////  BuiltinRandIntExpr  ////////////////////////
+
+class BuiltinRandIntExpr : public ExprObjImpl
+{
+public:
+  BuiltinRandIntExpr(Expr expr) : expr(expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term t = expr.evaluate(env, ie);
+
+    if (t.is_int())
+      return int_obj(rand() % (t.get_int() + 1));
+
+    cerr << "Input to _rand_int_ is not an integer:\n" << t.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  Expr expr;
+};
+
+Expr builtin_rand_int_expr(Expr max_expr)
+{
+  return mk_expr(new BuiltinRandIntExpr(max_expr));
+}
+
+////////////////////////  BuiltinRandElemExpr  ////////////////////////
+
+class BuiltinRandElemExpr : public ExprObjImpl
+{
+public:
+  BuiltinRandElemExpr(Expr expr) : expr(expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term t = expr.evaluate(env, ie);
+
+    if (t.is_set())
+      return t.item(rand() % t.size());
+
+    cerr << "Input to _rand_elem_ is not a set:\n" << t.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  Expr expr;
+};
+
+Expr builtin_rand_elem_expr(Expr set_expr)
+{
+  return mk_expr(new BuiltinRandElemExpr(set_expr));
+}
+
 /////////////////////////  ReadFileExpr  /////////////////////////
 
 class ReadFileExpr : public ExprObjImpl
