@@ -2315,6 +2315,68 @@ Expr builtin_rand_elem_expr(Expr set_expr)
   return mk_expr(new BuiltinRandElemExpr(set_expr));
 }
 
+/////////////////////////  BuiltinTagObjGetTagExpr  /////////////////////////
+
+class BuiltinTagObjGetTagExpr : public ExprObjImpl
+{
+public:
+  BuiltinTagObjGetTagExpr(Expr expr) : expr(expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term t = expr.evaluate(env, ie);
+
+    if (t.is_tagged_obj())
+      return symbol_obj(t.get_tag());
+
+    cerr << "Input to _tag_ is not a tagged object::\n" << t.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  Expr expr;
+};
+
+Expr builtin_tag_obj_get_tag_expr(Expr tag_obj_expr)
+{
+  return mk_expr(new BuiltinTagObjGetTagExpr(tag_obj_expr));
+}
+
+/////////////////////////  BuiltinTagObjGetObjExpr  /////////////////////////
+
+class BuiltinTagObjGetObjExpr : public ExprObjImpl
+{
+public:
+  BuiltinTagObjGetObjExpr(Expr expr) : expr(expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term t = expr.evaluate(env, ie);
+
+    if (t.is_tagged_obj())
+      return t.untag();
+
+    cerr << "Input to _obj_ is not a tagged object::\n" << t.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  Expr expr;
+};
+
+Expr builtin_tag_obj_get_obj_expr(Expr tag_obj_expr)
+{
+  return mk_expr(new BuiltinTagObjGetObjExpr(tag_obj_expr));
+}
+
 /////////////////////////  ReadFileExpr  /////////////////////////
 
 class ReadFileExpr : public ExprObjImpl
@@ -2364,7 +2426,7 @@ public:
       }
 	  }
 	  
-    cerr << "Parameter of _" << (raw ? "file" : "obj") << "_(filename) is not a string:\n" << fn.to_string(true) << endl;
+    cerr << "Parameter of _" << (raw ? "file" : "load") << "_(filename) is not a string:\n" << fn.to_string(true) << endl;
 	  Program::get_singleton().print_stack();
 	  halt;
 	}

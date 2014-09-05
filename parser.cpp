@@ -1146,7 +1146,7 @@ obj mk_expr_builtin_call(obj builtin_name, obj params)
     return box(builtin_neg_call_expr(ps[0]));
   }
   
-  if (name == "_obj_")
+  if (name == "_load_")
   {
     assert(ps.size() == 1);
     return box(read_file_call_expr(ps[0], false));
@@ -1252,7 +1252,7 @@ obj mk_expr_builtin_call(obj builtin_name, obj params)
     return box(builtin_list_to_seq_call_expr(ps[0]));
   }
 
-  if (name == "_rand_int_")
+  if (name == "_rand_nat_")
   {
     assert(ps.size() == 1);
     return box(builtin_rand_int_expr(ps[0]));
@@ -1262,6 +1262,18 @@ obj mk_expr_builtin_call(obj builtin_name, obj params)
   {
     assert(ps.size() == 1);
     return box(builtin_rand_elem_expr(ps[0]));
+  }
+
+  if (name == "_tag_")
+  {
+    assert(ps.size() == 1);
+    return box(builtin_tag_obj_get_tag_expr(ps[0]));
+  }
+
+  if (name == "_obj_")
+  {
+    assert(ps.size() == 1);
+    return box(builtin_tag_obj_get_obj_expr(ps[0]));
   }
 
   halt;

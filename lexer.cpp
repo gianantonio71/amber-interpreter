@@ -287,7 +287,7 @@ bool is_valid_builtin(const string &str)
 	if (str == "_neg_")
 		return true;
 
-	if (str == "_obj_")
+	if (str == "_load_")
 		return true;
 
 	if (str == "_file_")
@@ -341,10 +341,16 @@ bool is_valid_builtin(const string &str)
   if (str == "_list_to_seq_")
     return true;
 
-  if (str == "_rand_int_")
+  if (str == "_rand_nat_")
     return true;
 
   if (str == "_rand_elem_")
+    return true;
+
+  if (str == "_tag_")
+    return true;
+
+  if (str == "_obj_")
     return true;
 
 	return false;
