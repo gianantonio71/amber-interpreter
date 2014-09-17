@@ -114,5 +114,69 @@ private:
 };
 
 
+class SymbPtrn : public Pattern
+{
+public:
+  pattern bind_known_vars(Env &env);
+  bool is_fully_bound();
+
+  bool matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set);
+};
+
+
+class IntPtrn : public Pattern
+{
+public:
+  pattern bind_known_vars(Env &env);
+  bool is_fully_bound();
+
+  bool matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set);
+};
+
+
+class SeqPtrn : public Pattern
+{
+public:
+  SeqPtrn(bool empty_only);
+
+  pattern bind_known_vars(Env &env);
+  bool is_fully_bound();
+
+  bool matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set);
+
+private:
+  bool empty_only;
+};
+
+
+class SetPtrn : public Pattern
+{
+public:
+  SetPtrn(bool empty_only);
+
+  pattern bind_known_vars(Env &env);
+  bool is_fully_bound();
+
+  bool matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set);
+
+private:
+  bool empty_only;
+};
+
+
+class MapPtrn : public Pattern
+{
+public:
+  MapPtrn(bool empty_only);
+
+  pattern bind_known_vars(Env &env);
+  bool is_fully_bound();
+
+  bool matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set);
+
+private:
+  bool empty_only;
+};
+
 #endif
 

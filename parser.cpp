@@ -871,6 +871,46 @@ obj mk_lab_ptrn(obj lab, obj ptrn)
   return obj(new LabPtrn(mk_ctor(lab), unbox<Pattern>(ptrn)));
 }
 
+obj mk_ptrn_symb()
+{
+  return obj(new SymbPtrn());
+}
+
+obj mk_ptrn_int()
+{
+  return obj(new IntPtrn());
+}
+
+obj mk_ptrn_empty_seq()
+{
+  return obj(new SeqPtrn(true));
+}
+
+obj mk_ptrn_seq()
+{
+  return obj(new SeqPtrn(false));
+}
+
+obj mk_ptrn_empty_set()
+{
+  return obj(new SetPtrn(true));
+}
+
+obj mk_ptrn_set()
+{
+  return obj(new SetPtrn(false));
+}
+
+obj mk_ptrn_empty_map()
+{
+  return obj(new MapPtrn(true));
+}
+
+obj mk_ptrn_map()
+{
+  return obj(new MapPtrn(false));
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

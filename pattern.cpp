@@ -210,3 +210,103 @@ bool TuplePtrn::matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_alrea
   
   return true;
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+
+pattern SymbPtrn::bind_known_vars(Env &env)
+{
+  return pattern(new SymbPtrn);
+}
+
+bool SymbPtrn::is_fully_bound()
+{
+  return true;
+}
+
+bool SymbPtrn::matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set)
+{
+  return t.is_symbol();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+pattern IntPtrn::bind_known_vars(Env &env)
+{
+  return pattern(new IntPtrn);
+}
+
+bool IntPtrn::is_fully_bound()
+{
+  return true;
+}
+
+bool IntPtrn::matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set)
+{
+  return t.is_int();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+SeqPtrn::SeqPtrn(bool empty_only) : empty_only(empty_only)
+{
+
+}
+
+pattern SeqPtrn::bind_known_vars(Env &env)
+{
+  return pattern(new SeqPtrn(empty_only));
+}
+
+bool SeqPtrn::is_fully_bound()
+{
+  return true;
+}
+
+bool SeqPtrn::matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set)
+{
+  return empty_only ? t.is_empty_seq() : t.is_seq();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+SetPtrn::SetPtrn(bool empty_only) : empty_only(empty_only)
+{
+
+}
+
+pattern SetPtrn::bind_known_vars(Env &env)
+{
+  return pattern(new SetPtrn(empty_only));
+}
+
+bool SetPtrn::is_fully_bound()
+{
+  return true;
+}
+
+bool SetPtrn::matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set)
+{
+  return empty_only ? t.is_empty_set() : t.is_set();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+MapPtrn::MapPtrn(bool empty_only) : empty_only(empty_only)
+{
+
+}
+
+pattern MapPtrn::bind_known_vars(Env &env)
+{
+  return pattern(new MapPtrn(empty_only));
+}
+
+bool MapPtrn::is_fully_bound()
+{
+  return true;
+}
+
+bool MapPtrn::matches(Term &t, Env &in_env, Env &delta_env, bool fail_if_already_set)
+{
+  return empty_only ? t.is_empty_map() : t.is_map();
+}

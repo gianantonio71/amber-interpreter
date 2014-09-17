@@ -61,6 +61,15 @@ obj mk_ptrn_tag_ptrn(obj tag, obj ptrn);
 obj mk_ptrn_tag_obj(obj tag_var, obj obj_var);
 obj mk_lab_ptrn(obj lab, obj ptrn);
 
+obj mk_ptrn_symb();
+obj mk_ptrn_int();
+obj mk_ptrn_empty_seq();
+obj mk_ptrn_seq();
+obj mk_ptrn_empty_set();
+obj mk_ptrn_set();
+obj mk_ptrn_empty_map();
+obj mk_ptrn_map();
+
 obj mk_type_ref(obj name);
 obj mk_type_var(obj var_name);
 obj mk_type_ref(obj name, obj type_pars);
