@@ -353,6 +353,21 @@ bool is_valid_builtin(const string &str)
   if (str == "_obj_")
     return true;
 
+  if (str == "_in_")
+    return true;
+
+  if (str == "_has_key_")
+    return true;
+
+  if (str == "_lookup_")
+    return true;
+
+  if (str == "_union_")
+    return true;
+
+  if (str == "_merge_")
+    return true;
+
 	return false;
 }
 

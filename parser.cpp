@@ -1316,6 +1316,36 @@ obj mk_expr_builtin_call(obj builtin_name, obj params)
     return box(builtin_tag_obj_get_obj_expr(ps[0]));
   }
 
+  if (name == "_in_")
+  {
+    assert(ps.size() == 2);
+    return box(builtin_in_expr(ps[0], ps[1]));
+  }
+
+  if (name == "_has_key_")
+  {
+    assert(ps.size() == 2);
+    return box(builtin_has_key_expr(ps[0], ps[1]));
+  }
+
+  if (name == "_lookup_")
+  {
+    assert(ps.size() == 2);
+    return box(builtin_lookup_expr(ps[0], ps[1]));
+  }
+
+  if (name == "_union_")
+  {
+    assert(ps.size() == 1);
+    return box(builtin_union_expr(ps[0]));
+  }
+
+  if (name == "_merge_")
+  {
+    assert(ps.size() == 1);
+    return box(builtin_merge_expr(ps[0]));
+  }
+
   halt;
 }
 

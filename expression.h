@@ -172,6 +172,13 @@ Expr builtin_rand_elem_expr(Expr set_expr);
 Expr builtin_tag_obj_get_tag_expr(Expr tag_obj_expr);
 Expr builtin_tag_obj_get_obj_expr(Expr tag_obj_expr);
 
+Expr builtin_in_expr(Expr elem_expr, Expr set_expr);
+Expr builtin_has_key_expr(Expr map_expr, Expr key_expr);
+Expr builtin_lookup_expr(Expr map_expr, Expr key_expr);
+
+Expr builtin_union_expr(Expr sets_expr);
+Expr builtin_merge_expr(Expr maps_expr);
+
 Expr read_file_call_expr(Expr file_name, bool raw);
 Expr write_to_file_call_expr(Expr file_name, bool append, Expr text);
 

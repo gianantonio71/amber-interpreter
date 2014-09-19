@@ -2377,6 +2377,226 @@ Expr builtin_tag_obj_get_obj_expr(Expr tag_obj_expr)
   return mk_expr(new BuiltinTagObjGetObjExpr(tag_obj_expr));
 }
 
+/////////////////////////  BuiltinInExpr  /////////////////////////
+
+class BuiltinInExpr : public ExprObjImpl
+{
+public:
+  BuiltinInExpr(Expr elem_expr, Expr set_expr) : elem_expr(elem_expr), set_expr(set_expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term e = elem_expr.evaluate(env, ie);
+    Term s = set_expr.evaluate(env, ie);
+
+    if (s.is_set())
+    {
+      term_v &items = s.items();
+      int size = items.size();
+      for (int i=0 ; i < size ; i++)
+        if (items[i] == e)
+          return bool_obj(true);
+      return bool_obj(false);
+    }
+
+    cerr << "Second parameter to _in_ is not a set:\n" << s.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  Expr elem_expr;
+  Expr set_expr;
+};
+
+Expr builtin_in_expr(Expr elem_expr, Expr set_expr)
+{
+  return mk_expr(new BuiltinInExpr(elem_expr, set_expr));
+}
+
+/////////////////////////  BuiltinHasKeyExpr  /////////////////////////
+
+class BuiltinHasKeyExpr : public ExprObjImpl
+{
+public:
+  BuiltinHasKeyExpr(Expr map_expr, Expr key_expr) : map_expr(map_expr), key_expr(key_expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term m = map_expr.evaluate(env, ie);
+    Term k = key_expr.evaluate(env, ie);
+
+    if (m.is_map())
+      return bool_obj(m.has_key(k));
+
+    cerr << "First parameter to _has_key_ is not a map:\n" << m.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  Expr map_expr;
+  Expr key_expr;
+};
+
+Expr builtin_has_key_expr(Expr map_expr, Expr key_expr)
+{
+  return mk_expr(new BuiltinHasKeyExpr(map_expr, key_expr));
+}
+
+/////////////////////////  BuiltinLookupExpr  /////////////////////////
+
+class BuiltinLookupExpr : public ExprObjImpl
+{
+public:
+  BuiltinLookupExpr(Expr map_expr, Expr key_expr) : map_expr(map_expr), key_expr(key_expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term m = map_expr.evaluate(env, ie);
+    Term k = key_expr.evaluate(env, ie);
+
+    if (m.is_map())
+      if (m.has_key(k))
+        return m.lookup(k);
+      else
+        cerr << "Error in _lookup_ builtin: key not present:\n" << m.to_string(true) << "\n\n\n\n" << k.to_string(true) << endl;
+    else
+      cerr << "First parameter to _lookup_ is not a map:\n" << m.to_string(true) << endl;
+
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  Expr map_expr;
+  Expr key_expr;
+};
+
+Expr builtin_lookup_expr(Expr map_expr, Expr key_expr)
+{
+  return mk_expr(new BuiltinLookupExpr(map_expr, key_expr));
+}
+
+/////////////////////////  BuiltinUnionExpr  /////////////////////////
+
+class BuiltinUnionExpr : public ExprObjImpl
+{
+public:
+  BuiltinUnionExpr(Expr sets_expr) : sets_expr(sets_expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term sets = sets_expr.evaluate(env, ie);
+
+    if (is_set_of_sets(sets))
+    {
+      term_v &elem_sets = sets.items();
+      term_v all_elems;
+      for (int i=0, n=elem_sets.size() ; i < n ; i++)
+      {
+        term_v &elems = elem_sets[i].items();
+        for (int j=0, m=elems.size() ; j < m ; j++)
+          all_elems.push_back(elems[j]);
+      }
+
+      return set_obj(all_elems);
+    }
+
+    cerr << "Input to _union_ is not a set of sets:\n" << sets.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  bool is_set_of_sets(Term t)
+  {
+    if (!t.is_set())
+      return false;
+    term_v &elems = t.items();
+    for (int i=0, n=elems.size() ; i < n ; i++)
+      if (!elems[i].is_set())
+        return false;
+    return true;
+  }
+
+private:
+  Expr sets_expr;
+};
+
+Expr builtin_union_expr(Expr sets_expr)
+{
+  return mk_expr(new BuiltinUnionExpr(sets_expr));
+}
+
+/////////////////////////  BuiltinMergeExpr  /////////////////////////
+
+class BuiltinMergeExpr : public ExprObjImpl
+{
+public:
+  BuiltinMergeExpr(Expr maps_expr) : maps_expr(maps_expr)
+  {
+
+  }
+
+  Term evaluate(Env &env, LocalDefs &ie)
+  {
+    Term maps = maps_expr.evaluate(env, ie);
+
+    if (is_set_of_maps(maps))
+    {
+      term_v &elem_maps = maps.items();
+      term_v all_keys, all_values;
+      for (int i=0, n=elem_maps.size() ; i < n ; i++)
+      {
+        Term map = elem_maps[i];
+        for (int j=0, m=map.size() ; j < m ; j++)
+        {
+          all_keys.push_back(map.get_key(j));
+          all_values.push_back(map.get_value(j));
+        }
+      }
+      return map_obj(all_keys, all_values);
+    }
+
+    cerr << "Input to _merge_ is not a set of maps:\n" << maps.to_string(true) << endl;
+    Program::get_singleton().print_stack();
+    halt;
+  }
+
+private:
+  bool is_set_of_maps(Term t)
+  {
+    if (!t.is_set())
+      return false;
+    term_v &elems = t.items();
+    for (int i=0, n=elems.size() ; i < n ; i++)
+      if (!elems[i].is_map())
+        return false;
+    return true;
+  }
+
+private:
+  Expr maps_expr;
+};
+
+Expr builtin_merge_expr(Expr maps_expr)
+{
+  return mk_expr(new BuiltinMergeExpr(maps_expr));
+}
+
 /////////////////////////  ReadFileExpr  /////////////////////////
 
 class ReadFileExpr : public ExprObjImpl
