@@ -43,7 +43,6 @@
 %token IN                   "::"
 
 %token OR                   "\\/"
-%token CROSSED_LEFT_ARROW   "</-"
 
 %token KW_AND               "and"
 %token KW_AS                "as"
@@ -236,9 +235,10 @@ stmt:
   | "return" expr "if" expr ';'                       {$$ = mk_stmt_return_if($2, $4);             }
 
   | vid ":=" expr ';'                                 {$$ = mk_stmt_assignment($1, $3);            }
-  //| vid ':' type ":=" expr ';'                        {$$ = mk_stmt_typed_assignment($1, $3, $5);  }
+  //| vid ',' vids ":=" expr ';'                        {$$ = mk_stmt_mult_assignment($1, $3, $5);   }
 
   | vid ":=" expr "if" expr ';'                       {$$ = mk_stmt_assignment_if($1, $3, $5);     }
+  //| vid ',' vids ":=" expr "if" expr ';'              {$$ = mk_stmt_mult_assignment_if($1, $3, $5, $7); }
   
   | "if" '(' expr ')' stmts elifs ';'                 {$$ = mk_stmt_if($3, $5, $6);                }
   | "if" '(' expr ')' stmts elifs "else" stmts ';'    {$$ = mk_stmt_if($3, $5, $6, $8);            }
@@ -275,8 +275,10 @@ for_iter:
     vid ':' expr                                      {$$ = mk_for_iter($1, $3);                   }
   | vid ',' vid ':' expr                              {$$ = mk_for_iter($1, $3, $5);               }
   | vid '=' expr ".." expr                            {$$ = mk_for_iter_range($1, $3, $5);         }
+  | '(' vid ',' vids ')' ':' expr                             {$$ = mk_for_iter_tuple($1, $3, $5);         }
+  | '(' vid ',' vids ')' ',' vid ':' expr                     {$$ = mk_for_iter_tuple($1, $2, $5, $7);     }
   ;
-  
+
 for_iters:
     for_iter                                          {$$ = mk_seq($1);                            }
   | for_iters ';' for_iter                            {$$ = mk_seq($1, $3);                        }
@@ -285,6 +287,11 @@ for_iters:
 stmts:
     stmt                                              {$$ = mk_seq($1);                            }
   | stmts stmt                                        {$$ = mk_seq($1, $2);                        }
+  ;
+
+vids:
+    vid                                               {$$ = mk_seq($1);                            }
+  | vids ',' vid                                      {$$ = mk_seq($1, $3);                        }
   ;
 
 /****************************** PATTERNS ******************************/
@@ -298,13 +305,8 @@ pattern:
   | ctor                                    {$$ = mk_ptrn_ctor($1);                               }
   | snum                                    {$$ = mk_ptrn_num($1);                                }
   | '_'                                     {$$ = mk_ptrn_jolly();                                }
-  //| '#' vid                                 {$$ = mk_ptrn_expr($2);                               }
-  //| '(' labptrns ')'                        {$$ = mk_ptrn_tuple($2, false);                       }
-  //| '(' labptrns ',' "..." ')'              {$$ = mk_ptrn_tuple($2, true);                        }
   | pid '(' ')'                             {$$ = mk_ptrn_tag_ptrn($1, mk_ptrn_jolly());          }
   | pid '(' pattern ')'                     {$$ = mk_ptrn_tag_ptrn($1, $3);                       }
-  //| pid '(' labptrns ')'                    {$$ = mk_ptrn_tag_ptrn($1, mk_ptrn_tuple($3, false)); }
-  //| pid '(' labptrns ',' "..." ')'          {$$ = mk_ptrn_tag_ptrn($1, mk_ptrn_tuple($3, true));  }
   | vid '@' vid                             {$$ = mk_ptrn_tag_obj($1, $3);                        }
 
   | '+'                                     {$$ = mk_ptrn_symb();                                 }
@@ -317,11 +319,6 @@ pattern:
   | '(' "..." ')'                           {$$ = mk_ptrn_map();                                  }
   ;
 
-//labptrns:
-//    lab pattern                             {$$ = mk_seq(mk_lab_ptrn($1, $2));                    }
-//  | labptrns ',' lab pattern                {$$ = mk_seq($1, mk_lab_ptrn($3, $4));                }
-//  ;
-  
 patterns:
     pattern                                 {$$ = mk_seq($1);                                     }
   | patterns ',' pattern                    {$$ = mk_seq($1, $3);                                 }
@@ -330,12 +327,6 @@ patterns:
 /******************************* TYPES ********************************/
 
 type:
-    ntltype
-  | type '*'                                      {$$ = mk_type_set($1, false);                     }
-  | type '+'                                      {$$ = mk_type_set($1, true);                      }
-  ;                                                 
-
-ntltype:
     tname                                         {$$ = mk_type_ref($1);                            }
   | tvar                                          {$$ = mk_type_var($1);                            }
   | tname '[' types ']'                           {$$ = mk_type_ref($1, $3);                        }
@@ -347,17 +338,18 @@ ntltype:
   | '[' '*' ".." snum ']'                         {$$ = mk_type_up_bounded_int($4);                 }
   | '[' snum ".." snum ']'                        {$$ = mk_type_bounded_int($2, $4);                }
   
-  | '[' ntltype '*' ']'                           {$$ = mk_type_seq($2, false);                     }
-  | '[' ntltype '+' ']'                           {$$ = mk_type_seq($2, true);                      }
-  | '[' ntltypes ']'                              {$$ = mk_type_fixed_seq($2);                      }
+  | '[' type ']'                                  {$$ = mk_type_seq($2, false);                     }
+  | '[' type '^' ']'                              {$$ = mk_type_seq($2, true);                      }
 
-  | '(' type '*' ')'                              {$$ = mk_type_set($2, false);                     }
-  | '(' type '+' ')'                              {$$ = mk_type_set($2, true);                      }
-  
+  | type '*'                                      {$$ = mk_type_set($1, false);                     }
+  | type '+'                                      {$$ = mk_type_set($1, true);                      }
+
   | '(' type "=>" type ')'                        {$$ = mk_type_map($2, $4);                        }
   | '(' labtypes ')'                              {$$ = mk_type_tuple($2);                          }
 
-  | '(' ntltype '@' type ')'                      {$$ = mk_type_tagged_obj($2, $4);                 }
+  | '(' type ',' types ')'                        {$$ = mk_type_pos_tuple($2, $4);                  }
+
+  | '(' type '@' type ')'                      {$$ = mk_type_tagged_obj($2, $4);                 }
   ;
 
 pretype:
@@ -378,11 +370,6 @@ labtype:
 types:
     type                                          {$$ = mk_seq($1);                                 }
   | types ',' type                                {$$ = mk_seq($1, $3);                             }
-  ;
-
-ntltypes:
-    ntltype                                       {$$ = mk_seq($1);                                 }
-  | ntltypes ',' ntltype                          {$$ = mk_seq($1, $3);                             }
   ;
 
 pretypes:
@@ -412,6 +399,8 @@ expr:
   | '(' ')'                                                 {$$ = mk_expr_map(mk_seq_empty());                }
   | '(' map_entries ')'                                     {$$ = mk_expr_map($2);                            }
   | '(' labexprs ')'                                        {$$ = mk_expr_tuple($2);                          }
+
+  | '(' expr ',' exprs ')'                                  {$$ = mk_expr_pos_tuple($2, $4);                  }
 
   | '[' ']'                                                 {$$ = mk_expr_seq(mk_seq_empty());                }
   | '[' exprs ']'                                           {$$ = mk_expr_seq($2);                            }
@@ -489,6 +478,11 @@ expr:
   | '[' expr ':' vid "<-" expr ',' expr ']'                 {$$ = mk_expr_flc($2, $4, $6, $8);                }
   | '[' expr ':' vid ',' vid "<-" expr ',' expr ']'         {$$ = mk_expr_flc($2, $4, $6, $8, $10);           }
 
+  //| '[' expr ':' '(' vid ',' vids_comma ')' "<-" expr ']'                   {$$ = mk_expr_lc_tuple($2, $4, $6, $8, $10);          }
+  //| '[' expr ':' '(' vid ',' vids_comma ')' "<-" expr ',' expr ']'          {$$ = mk_expr_flc_tuple($2, $4, $6, $8, $10, $12);    }
+  //| '[' expr ':' '(' vid ',' vids_comma ')' ',' vid "<-" expr ']'           {$$ = mk_expr_lc_tuple($2, $4, $6, $8, $10);          }
+  //| '[' expr ':' '(' vid ',' vids_comma ')' ',' vid "<-" expr ',' expr ']'  {$$ = mk_expr_flc_tuple($2, $4, $6, $8, $10, $12);    }
+
   | "if" if_branches "else" expr exp_close                  {$$ = mk_expr_if($2, $4);                         }
   | "match" '(' exprs ')' match_branches exp_close          {$$ = mk_expr_match($3, $5);                        }
   //| "do" stmts exp_close                                    {$$ = mk_expr_do($2);                             }
@@ -559,8 +553,6 @@ clauses:
 clause: 
     pattern "<-" expr                                       {$$ = mk_clause_in($1, $3);                       }
   | pattern "=>" pattern "<-" expr                          {$$ = mk_clause_in_map($1, $3, $5);                       }
-  | pattern "</-" expr                                      {$$ = mk_clause_not_in($1, $3);                   }
-  | pattern "=>" pattern "</-" expr                         {$$ = mk_clause_not_in_map($1, $3, $5);                       }
   | vid '=' expr                                            {$$ = mk_clause_eq($1, $3);                       }
   | '(' clauses ')'                                         {$$ = mk_clause_and($2);                          }
   | clause "\\/" clause                                     {$$ = mk_clause_or($1, $3);                       }
@@ -592,6 +584,11 @@ let_fnargs:
   ;
 
 /*
+vids_comma:
+    vid
+  | vids_comma ',' vid
+  ;
+
 actual_arg:
     expr
   | vid '=' expr
@@ -603,10 +600,6 @@ actual_args:
   | actual_args ',' actual_arg
   ;
   
-vids:
-    vid
-  | vids ',' vid
-  ;
 */
 
 /****************************** OTHERS ********************************/
@@ -820,7 +813,6 @@ int yylex(void)
   if (streq(str, "=="))          return EQ;
   if (streq(str, "::"))          return IN;
   if (streq(str, "\\/"))         return OR;
-  if (streq(str, "</-"))         return CROSSED_LEFT_ARROW;
 
   for (int i=0 ; i < lengthof(token_to_id_map) ; i++)
     if (streq(str, token_to_id_map[i].str))

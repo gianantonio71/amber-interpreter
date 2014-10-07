@@ -125,10 +125,10 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T> ref<T> unbox(obj obj)
+template <typename T> ref<T> unbox(obj obj_)
 {
-  assert(has_type<T>(obj));
-  return downcast<T>(obj);
+  assert(has_type<T>(obj_));
+  return downcast<T>(obj_);
 }
 
 template <typename T> ref_v<T> unboxv(obj obj)
@@ -602,9 +602,9 @@ obj mk_stmt_assignment(obj var, obj expr)
   return obj(new Assignment(mk_plain_id(var), to_expr(expr)));
 }
 
-obj mk_stmt_typed_assignment(obj var, obj type, obj expr)
+obj mk_stmt_mult_assignment(obj var, obj vars, obj expr)
 {
-  return obj(new Assignment(mk_plain_id(var), to_expr(expr), unbox<Type>(type)));
+  throw;
 }
 
 obj mk_stmt_assignment_if(obj var, obj expr, obj cond)
@@ -614,6 +614,11 @@ obj mk_stmt_assignment_if(obj var, obj expr, obj cond)
            mk_seq(mk_stmt_assignment(var, expr)),
            mk_seq_empty()
          );
+}
+
+obj mk_stmt_mult_assignment_if(obj var, obj vars, obj expr, obj cond)
+{
+  throw;
 }
 
 obj mk_stmt_return(obj expr)
@@ -781,6 +786,16 @@ obj mk_for_iter(obj var, obj idx_var, obj seq)
 obj mk_for_iter_range(obj var, obj start_expr, obj end_expr)
 {
   return obj(new ForIter(mk_plain_id(var), to_expr(start_expr), to_expr(end_expr)));
+}
+
+obj mk_for_iter_tuple(obj var, obj vars, obj seq)
+{
+  throw;
+}
+
+obj mk_for_iter_tuple(obj var, obj vars, obj idx_var, obj seq)
+{
+  throw;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1016,6 +1031,11 @@ obj mk_type_tuple(obj lab_types)
   return obj(new TupleType(ks, ts, os));
 }
 
+obj mk_type_pos_tuple(obj type, obj types)
+{
+  throw;
+}
+
 obj mk_type_tagged_obj(obj tag_type, obj obj_type)
 {
   return ::obj(new TagType(unbox<Type>(tag_type), unbox<Type>(obj_type)));
@@ -1142,6 +1162,11 @@ obj mk_expr_tuple(obj labexprs)
   }
   
   return box(tuple_expr(keys, values));
+}
+
+obj mk_expr_pos_tuple(obj first, obj rest)
+{
+  throw;
 }
 
 obj mk_expr_tag_obj(obj tag_expr, obj obj_expr)
