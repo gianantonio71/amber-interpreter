@@ -973,13 +973,20 @@ public:
     Term ev_in_seq = input_seq.evaluate(env, ie);
     //term_v values = ev_in_seq.unbuild_seq();
 
+    if (!ev_in_seq.is_seq())
+    {
+      cout << "Source object in list comprehension expression is not a sequence:\n" << ev_in_seq.to_string() << endl;
+      Program::get_singleton().print_stack();
+      halt;
+    }
+
     term_v res;
     
     if (env.is_set(var_name))
     {
-		  cout << "The variable " << var_name.to_string() << " is already set in environment:\n" << env.to_string() << endl;
+		  cout << "The variable " << var_name.to_string() << " is already set in environment:\n" << env.to_string(true) << endl;
 		  Program::get_singleton().print_stack();
-		  halt;    
+		  halt;
     }
     
     assert(!env.is_set(var_name));
