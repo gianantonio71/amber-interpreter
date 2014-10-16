@@ -119,14 +119,14 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  cout << "\nParsing successful" << endl;
+  // cout << "\nParsing successful" << endl;
 
   int parsing_done_tc = get_tick_count();
 
   Program::get_singleton().freeze();
 
-  cout << "Lexing:         " << (lexing_done_tc - start_tc)                 << endl;
-  cout << "Parsing:        " << (parsing_done_tc - lexing_done_tc)          << endl;
+  // cout << "Lexing:         " << (lexing_done_tc - start_tc)                 << endl;
+  // cout << "Parsing:        " << (parsing_done_tc - lexing_done_tc)          << endl;
 
 
   const int NUM_REP = 1;
@@ -209,7 +209,7 @@ obj get_token(unsigned int idx, char *str, int &line, int &col)
 
   if (t.filename != last_file)
   {
-    cout << t.filename << endl;
+    // cout << t.filename << endl;
     last_file = t.filename;
   }
   

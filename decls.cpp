@@ -461,9 +461,7 @@ void Program::run_tests()
     num_of_failures += test_blocks[i]->run(env, ienv);
   }
 
-  if (num_of_failures == 0)
-    cout << "All tests were successful" << endl;
-  else
+  if (num_of_failures > 0)
     cout << num_of_failures << " test(s) failed" << endl;
 }
 
